@@ -108,7 +108,6 @@ public class ServiceHttp extends SimpleChannelInboundHandler<FullHttpRequest> {
         );
         pipeline.remove(this);
     }
-
     private void handleHttpRequest(FullHttpRequest req) {
         ChannelPipeline pipeline = ctx.pipeline();
 
@@ -180,7 +179,7 @@ public class ServiceHttp extends SimpleChannelInboundHandler<FullHttpRequest> {
         //now build request
         JSONObject requestJson = new JSONObject();
         for (Map.Entry<String, List<String>> entry : queryStringDecoder.parameters().entrySet()) {
-            if (entry.getValue() == null || entry.getValue().size() == 0) {
+            if (entry.getValue() == null || entry.getValue().isEmpty()) {
                 continue;
             }
             requestJson.put(entry.getKey(), entry.getValue().get(0));
@@ -196,7 +195,7 @@ public class ServiceHttp extends SimpleChannelInboundHandler<FullHttpRequest> {
                 requestJson.putAll(JSONObject.parseObject(postBody));
             } catch (JSONException e) {
                 for (Map.Entry<String, List<String>> entry : new QueryStringDecoder(postBody, false).parameters().entrySet()) {
-                    if (entry.getValue() == null || entry.getValue().size() == 0) {
+                    if (entry.getValue() == null || entry.getValue().isEmpty()) {
                         continue;
                     }
                     requestJson.put(entry.getKey(), entry.getValue().get(0));

@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
-
     <!-- 保存路径-->
     <property name="logDir" value="./logs/"/>
     <!-- 保存日志天数-->
     <property name="maxHistory" value="3"/>
-
     <property name="errorMaxHistory" value="30"/>
     <!-- 项目名-->
     <property name="projectName" value="sekiro-open-demo"/>
 
     <property name="normal-pattern"
               value="[%d [%t] %5p %c{50}:%L]  %m%n"/>
-
-
     <appender name="Sekiro" class="ch.qos.logback.classic.sift.SiftingAppender">
         <discriminator>
             <key>sekiroGroup</key>

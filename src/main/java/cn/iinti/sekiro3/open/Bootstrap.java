@@ -8,6 +8,8 @@ import cn.iinti.sekiro3.business.netty.channel.nio.NioEventLoopGroup;
 import cn.iinti.sekiro3.business.netty.channel.socket.SocketChannel;
 import cn.iinti.sekiro3.business.netty.channel.socket.nio.NioServerSocketChannel;
 import cn.iinti.sekiro3.business.netty.util.concurrent.DefaultThreadFactory;
+import cn.iinti.sekiro3.business.netty.util.concurrent.Future;
+import cn.iinti.sekiro3.business.netty.util.concurrent.GenericFutureListener;
 import cn.iinti.sekiro3.open.core.Session;
 import cn.iinti.sekiro3.open.detector.HttpMatcher;
 import cn.iinti.sekiro3.open.detector.ProtocolDetector;
@@ -19,6 +21,8 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -31,7 +35,6 @@ public class Bootstrap {
     @Getter
     public static Integer listenPort;
 
-    private static final String IntMessage = "welcome use sekiro framework, for more support please visit our website: https://iinti.cn/";
     public static boolean isLocalDebug;
 
     public static void main(String[] args) throws Exception {
@@ -40,14 +43,12 @@ public class Bootstrap {
         }
         InputStream resourceAsStream = Bootstrap.class.getClassLoader().getResourceAsStream("config.properties");
         properties.load(resourceAsStream);
-
         isLocalDebug = BooleanUtils.toBoolean(properties.getProperty("sekiro.localDebug"));
-
         startUp();
         started = true;
     }
 
-    private static void startUp() {
+    private static void startUp() throws UnknownHostException {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
 
         NioEventLoopGroup serverBossGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2, new DefaultThreadFactory("sekiro-boss"));
@@ -70,16 +71,19 @@ public class Bootstrap {
                 socketChannel.pipeline().addLast(protocolDetector);
             }
         });
-
+        String ip = InetAddress.getLocalHost().getHostAddress();
         listenPort = NumberUtils.toInt(properties.getProperty("sekiro.port", "5612"));
+        System.out.println("接口地址: http://"+ip+":"+listenPort);
         log.info("start sekiro netty server,port:{}", listenPort);
-        log.info(IntMessage);
-        System.out.println(IntMessage);
-        serverBootstrap.bind(listenPort).addListener(future -> {
-            if (future.isSuccess()) {
-                log.info("sekiro netty server start success");
-            } else {
-                log.info("sekiro netty server start failed");
+
+        serverBootstrap.bind(listenPort).addListener(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> future) throws Exception {
+                if (future.isSuccess()) {
+                    log.info("sekiro netty server start success");
+                } else {
+                    log.info("sekiro netty server start failed");
+                }
             }
         });
     }
